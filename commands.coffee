@@ -13,23 +13,38 @@ commands =
       m.indexOf('!weather') is 0
 
     run: (message) ->
-      search = message.substring 9
-      util.log 'Fetching weather for: ' + search
+      search = message.substring(9).trim()
+      if search is ""
+        search = "10013"
 
-      query = "select item from weather.forecast where location = #{ search }"
-      uri = "http://query.yahooapis.com/v1/public/yql?format=json&q=#{ encodeURIComponent(query) }"
-      util.log uri
-      request({ uri: uri }, (error, response, body) ->
-        json = JSON.parse body
-        util.log body
-        item = json.query.results.channel.item
-        if not item.condition
-          response = item.title
-        else
-          response = "#{ item.title }: #{ item.condition.temp } degrees and #{ item.condition.text }"
+      queryWeather = (zip) ->
+        util.log 'Fetching weather for: ' + search
+        query = "select item from weather.forecast where location = '#{ zip }'"
+        uri = "http://query.yahooapis.com/v1/public/yql?format=json&q=#{ encodeURIComponent(query) }"
+        util.log uri
+        request({ uri: uri }, (error, response, body) ->
+          json = JSON.parse body
+          item = json.query.results.channel.item
+          if not item.condition
+            response = item.title
+          else
+            response = "#{ item.title }: #{ item.condition.temp } degrees and #{ item.condition.text }"
+          actions.send response
+        )
 
-        actions.send response
-      )
+      if not parseInt(search)
+        # probably not a zipcode...try to figure out the zipcode
+        query = "select * from geo.placefinder where text=\"#{ search }\""
+        uri = "http://query.yahooapis.com/v1/public/yql?format=json&q=#{ encodeURIComponent(query) }"
+        util.log uri
+        request({ uri: uri }, (error, response, body) ->
+          json = JSON.parse body
+          result = json.query.results.Result
+          zip = result.uzip
+          queryWeather(zip)
+        )
+      else
+        queryWeather(search)
 
   introduce:
 
