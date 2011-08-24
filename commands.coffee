@@ -39,9 +39,12 @@ commands =
         util.log uri
         request({ uri: uri }, (error, response, body) ->
           json = JSON.parse body
-          result = json.query.results.Result
-          zip = result.uzip
-          queryWeather(zip)
+          if not json.query.results
+            actions.send "There is no weather in #{ search }"
+          else
+            result = json.query.results.Result
+            zip = result.uzip
+            queryWeather(zip)
         )
       else
         queryWeather(search)
@@ -49,11 +52,11 @@ commands =
   introduce:
 
     match: (m) ->
-      m.indexOf('meet SSBot') isnt -1
+      m.indexOf('meet Skynet') isnt -1
 
     run: (message) ->
       i = message.indexOf('meet')
       name = message.substring(0, i).trim()
-      actions.send "Hello #{ name }, I'm SSBot!"
+      actions.send "Hello #{ name }, I'm Skynet!"
 
 module.exports = { commands: commands, init: init }
