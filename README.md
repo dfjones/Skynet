@@ -1,5 +1,7 @@
-h1. Requirements
+# Requirements
 
 npm install coffee-script
+
 npm install node-xmpp
+
 npm install request
