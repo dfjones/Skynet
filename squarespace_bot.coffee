@@ -42,9 +42,8 @@ cl.on 'online', ->
 
   util.log "Here!"
   setInterval( ->
-    #cl.send(' ')
-    actions.send 'Bob meet SSBot!',
-  3000)
+    cl.send(' ')
+  30000)
 
 cl.on 'stanza', (stanza) ->
   if stanza.attrs.type is 'error'
@@ -56,8 +55,8 @@ cl.on 'stanza', (stanza) ->
     return
 
   # ignore messages we sent
-  #if stanza.attrs.from is account.roomJid + '/' + account.roomNick
-  #  return
+  if stanza.attrs.from is account.roomJid + '/' + account.roomNick
+    return
 
   body = stanza.getChild 'body'
   # ignore messages without a body
