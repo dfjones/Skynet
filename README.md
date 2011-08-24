@@ -21,4 +21,4 @@ module.exports = config
 ```
 
 # Run
-coffee squarespace_bot.coffee
+coffee skynet.coffee
