@@ -28,7 +28,7 @@ commands.init({
 })
       
 cl.on 'online', ->
-  util.log("Online!")
+  util.log("Skynet Online")
 
   cl.send(new xmpp.Element('presence', { type: 'available' }).
     c('show').t('chat')
@@ -40,7 +40,6 @@ cl.on 'online', ->
     c('x', { xmlns: 'http://jabber.org/protocol/muc' })
   )
 
-  util.log "Here!"
   setInterval( ->
     cl.send(' ')
   30000)
