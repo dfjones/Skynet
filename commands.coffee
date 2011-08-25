@@ -36,7 +36,6 @@ commands =
         # probably not a zipcode...try to figure out the zipcode
         query = "select * from geo.placefinder where text=\"#{ search }\""
         uri = "http://query.yahooapis.com/v1/public/yql?format=json&q=#{ encodeURIComponent(query) }"
-        util.log uri
         request({ uri: uri }, (error, response, body) ->
           json = JSON.parse body
           if not json.query.results
@@ -58,5 +57,27 @@ commands =
       i = message.indexOf('meet')
       name = message.substring(0, i).trim()
       actions.send "Hello #{ name }, I'm Skynet!"
+
+  google:
+
+    match: (m) ->
+      m.indexOf('!google') is 0
+
+    run: (message) ->
+      search = message.substring(8).trim()
+      util.log "Google search for: #{ search }"
+
+      uri = "http://ajax.googleapis.com/ajax/services/search/web?v=1.0&q=#{ encodeURIComponent(search) }"
+
+      request({ uri: uri }, (error, response, body) ->
+        json = JSON.parse body
+        if json?.responseData?.results?
+          r = json.responseData.results[0]
+          actions.send "Top Hit: #{ r.title } - #{ r.url }"
+        else
+          actions.send "No hits!"
+      )
+
+
 
 module.exports = { commands: commands, init: init }

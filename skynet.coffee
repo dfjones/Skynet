@@ -16,7 +16,7 @@ actions =
   send: (message) ->
     util.log "Sending: " + message
     if actions.sender?
-      util.log actions.sender
+      util.log "Sending reply to: " + actions.sender
       to = actions.sender
       type = 'chat'
     else
