@@ -11,12 +11,22 @@ cl = new xmpp.Client
   password: account.password
 
 actions =
+  room: account.roomJid + '/' + account.roomNick,
+  sender: null,
   send: (message) ->
     util.log "Sending: " + message
+    if actions.sender?
+      util.log actions.sender
+      to = actions.sender
+      type = 'chat'
+    else
+      to = actions.room
+      type = 'groupchat'
+
     cl.send(new xmpp.Element('message',
         {
-          to: account.roomJid + '/' + account.roomNick,
-          type: 'groupchat'
+          to: to,
+          type: type
         }
       ).
       c('body').
@@ -40,18 +50,24 @@ cl.on 'online', ->
     c('x', { xmlns: 'http://jabber.org/protocol/muc' })
   )
 
-  util.log "Here!"
   setInterval( ->
     cl.send(' ')
   30000)
 
 cl.on 'stanza', (stanza) ->
-  if stanza.attrs.type is 'error'
+  if stanza.attrs?.type is 'error'
     util.log '[error]' + stanza
     return
 
   # ignore everything that isn't a room message
-  if not stanza.is 'message' or not stanza.attrs.type is 'groupchat'
+  if not stanza.is('message')
+    return
+
+  if stanza.attrs?.type is 'chat'
+    actions.sender = stanza.attrs.from
+  else if stanza.attrs?.type is 'groupchat'
+    actions.sender = null
+  else
     return
 
   # ignore messages we sent
