@@ -84,4 +84,7 @@ cl.on 'stanza', (stanza) ->
   for c of commands.commands
     c = commands.commands[c]
     if c.match message
-      c.run message
+      try
+        c.run message
+      catch error
+        util.log "Error: #{ error }"
