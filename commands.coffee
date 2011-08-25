@@ -78,6 +78,20 @@ commands =
           actions.send "No hits!"
       )
 
+  umbrella:
 
+    match: (m) ->
+      m.indexOf('!umbrella') is 0
+
+    run: (message) ->
+      uri = "http://umbrellatoday.com/locations/596360971/forecast"
+
+      request({ uri: uri }, (error, response, body) ->
+        re = new RegExp('<span>(YES|NO)</span>')
+
+        if body.match(re)?
+          answer = body.match(re)[1]
+          actions.send answer
+      )
 
 module.exports = { commands: commands, init: init }
