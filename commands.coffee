@@ -1,19 +1,17 @@
 util = require 'util'
 request = require 'request'
 
-actions = null
+comms = null
 
 init = (params) ->
-  actions = params.actions
+  comms = params.comms
 
+# commands are triggered by a message the begins with their name
+# they accept an argument list which contains every word (separated by whitespace) in the message
 commands =
-  weather:
-
-    match: (m) ->
-      m.indexOf('!weather') is 0
-
-    run: (message) ->
-      search = message.substring(9).trim()
+  "!weather":
+    run: (args) ->
+      search = args.join(' ')
       if search is ""
         search = "10013"
 
@@ -29,7 +27,7 @@ commands =
             response = item.title
           else
             response = "#{ item.title }: #{ item.condition.temp } degrees and #{ item.condition.text }"
-          actions.send response
+          comms.send response
         )
 
       if not parseInt(search)
@@ -39,7 +37,7 @@ commands =
         request({ uri: uri }, (error, response, body) ->
           json = JSON.parse body
           if not json.query.results
-            actions.send "There is no weather in #{ search }"
+            comms.send "There is no weather in #{ search }"
           else
             result = json.query.results.Result
             zip = result.uzip
@@ -47,6 +45,50 @@ commands =
         )
       else
         queryWeather(search)
+
+  "!google":
+
+    run: (args) ->
+      search = args.join(' ')
+      util.log "Google search for: #{ search }"
+
+      uri = "http://ajax.googleapis.com/ajax/services/search/web?v=1.0&q=#{ encodeURIComponent(search) }"
+
+      request({ uri: uri }, (error, response, body) ->
+        json = JSON.parse body
+        if json?.responseData?.results?
+          r = json.responseData.results[0]
+          comms.send "Top Hit: #{ r.title } - #{ r.url }"
+        else
+          comms.send "No hits!"
+      )
+
+  "!umbrella":
+
+    run: (args) ->
+      uri = "http://umbrellatoday.com/locations/596360971/forecast"
+
+      request({ uri: uri }, (error, response, body) ->
+        re = new RegExp('<span>(YES|NO)</span>')
+
+        if body.match(re)?
+          answer = body.match(re)[1]
+          comms.send answer
+      )
+
+  "!help":
+    
+    run: (args) ->
+      s = "Valid Commands:\n"
+      for c of commands
+        s += "#{ c }\n"
+
+      comms.send s
+
+# inspections are more complicated commands that are responsible for
+# inspection the message text in their match function. If they want to run
+# for the given message, match should return true
+inspections =
 
   introduce:
 
@@ -56,42 +98,12 @@ commands =
     run: (message) ->
       i = message.indexOf('meet')
       name = message.substring(0, i).trim()
-      actions.send "Hello #{ name }, I'm Skynet!"
+      comms.send "Hello #{ name }, I'm Skynet!"
 
-  google:
 
-    match: (m) ->
-      m.indexOf('!google') is 0
+module.exports = {
+  commands: commands,
+  inspections: inspections,
+  init: init
+}
 
-    run: (message) ->
-      search = message.substring(8).trim()
-      util.log "Google search for: #{ search }"
-
-      uri = "http://ajax.googleapis.com/ajax/services/search/web?v=1.0&q=#{ encodeURIComponent(search) }"
-
-      request({ uri: uri }, (error, response, body) ->
-        json = JSON.parse body
-        if json?.responseData?.results?
-          r = json.responseData.results[0]
-          actions.send "Top Hit: #{ r.title } - #{ r.url }"
-        else
-          actions.send "No hits!"
-      )
-
-  umbrella:
-
-    match: (m) ->
-      m.indexOf('!umbrella') is 0
-
-    run: (message) ->
-      uri = "http://umbrellatoday.com/locations/596360971/forecast"
-
-      request({ uri: uri }, (error, response, body) ->
-        re = new RegExp('<span>(YES|NO)</span>')
-
-        if body.match(re)?
-          answer = body.match(re)[1]
-          actions.send answer
-      )
-
-module.exports = { commands: commands, init: init }

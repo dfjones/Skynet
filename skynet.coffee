@@ -4,23 +4,41 @@ sys = require 'sys'
 util = require 'util'
 xmpp = require 'node-xmpp'
 account = require './account'
-commands = require './commands'
+commands = require('./commands')
 
-cl = new xmpp.Client
-  jid: account.jabberId + '/bot'
-  password: account.password
+parseCommand = (message) ->
+  parts = message.split(' ')
+  return {
+    command: parts[0]?.trim()
+    args: parts[1..]
+  }
 
-actions =
+processMessage = (message) ->
+  mParts = parseCommand(message)
+
+  # if a command exists, run it
+  commands.commands[mParts.command]?.run(mParts.args)
+
+  # run all inspections on message body
+  for i of commands.inspections
+    i = commands.inspections[i]
+    if i.match message
+      try
+        i.run message
+      catch error
+        util.log "Error: #{ error }"
+
+comms =
   room: account.roomJid + '/' + account.roomNick,
   sender: null,
   send: (message) ->
     util.log "Sending: " + message
-    if actions.sender?
-      util.log "Sending reply to: " + actions.sender
-      to = actions.sender
+    if comms.sender?
+      util.log "Sending reply to: " + comms.sender
+      to = comms.sender
       type = 'chat'
     else
-      to = actions.room
+      to = comms.room
       type = 'groupchat'
 
     cl.send(new xmpp.Element('message',
@@ -34,8 +52,12 @@ actions =
     )
 
 commands.init({
-  actions: actions
+  comms: comms
 })
+
+cl = new xmpp.Client
+  jid: account.jabberId + '/bot'
+  password: account.password
       
 cl.on 'online', ->
   util.log("Skynet Online")
@@ -64,9 +86,9 @@ cl.on 'stanza', (stanza) ->
     return
 
   if stanza.attrs?.type is 'chat'
-    actions.sender = stanza.attrs.from
+    comms.sender = stanza.attrs.from
   else if stanza.attrs?.type is 'groupchat'
-    actions.sender = null
+    comms.sender = null
   else
     return
 
@@ -81,10 +103,7 @@ cl.on 'stanza', (stanza) ->
 
   message = body.getText()
 
-  for c of commands.commands
-    c = commands.commands[c]
-    if c.match message
-      try
-        c.run message
-      catch error
-        util.log "Error: #{ error }"
+  processMessage message
+
+
+exports.processMessage = processMessage
