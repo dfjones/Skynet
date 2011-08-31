@@ -76,6 +76,23 @@ commands =
           comms.send answer
       )
 
+  "!ddg":
+
+    run: (args) ->
+      search = args.join(' ')
+      uri = "http://api.duckduckgo.com/?q=#{ encodeURIComponent(search) }&format=json"
+
+      request({ uri: uri }, (error, response, body) ->
+        json = JSON.parse body
+        answer = "Definition: #{ json.Definition }" if json?.Definition
+        answer = "Abstract: #{ json.AbstractText }" if json?.AbstractText
+        if not answer
+          answer = "Nothing found!"
+        answer = answer + " (#{ json.AbstractURL })" if json?.AbstractURL
+        comms.send answer
+      )
+
+
   "!help":
     
     run: (args) ->
