@@ -111,10 +111,12 @@ commands =
         h = 12 * 60 * 60 * 1000
         if !c._todaysChoice.time or (now - c._todaysChoice.time >= h)
           old = c._todaysChoice.place
-          while old is c._todaysChoice.place
-            i = Math.floor(Math.random() * c._places.length)
-            c._todaysChoice.place = c._places[i]
-            c._todaysChoice.time = now
+          tp = c._places.slice(0)
+          if c._todaysChoice.place?
+            tp.splice(tp.indexOf(c._todaysChoice.place))
+          i = Math.floor(Math.random() * tp.length)
+          c._todaysChoice.place = tp[i]
+          c._todaysChoice.time = now
 
     run: (args) ->
       c = commands["!coffee"]
