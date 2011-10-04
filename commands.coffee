@@ -102,6 +102,14 @@ commands =
 
       comms.send s
 
+  "!coffee":
+
+    run: (args) ->
+      places = ["Colombe", "Saturdays", "Gimme Cofffe", "RBC"]
+      i = Math.floor(Math.random() * places.length)
+      comms.send places[i]
+
+
 # inspections are more complicated commands that are responsible for
 # inspection the message text in their match function. If they want to run
 # for the given message, match should return true
