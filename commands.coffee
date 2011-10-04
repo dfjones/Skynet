@@ -103,11 +103,31 @@ commands =
       comms.send s
 
   "!coffee":
+    _places: ["Colombe", "Saturdays", "Gimme Cofffe", "RBC", "Ground Support"]
+    _todaysChoice: {}
+    _makeChoice: () ->
+        c = commands["!coffee"]
+        now = new Date()
+        h = 12 * 60 * 60 * 1000
+        if !c._todaysChoice.time or (now - c._todaysChoice.time >= h)
+          old = c._todaysChoice.place
+          while old is c._todaysChoice.place
+            i = Math.floor(Math.random() * c._places.length)
+            c._todaysChoice.place = c._places[i]
+            c._todaysChoice.time = now
 
     run: (args) ->
-      places = ["Colombe", "Saturdays", "Gimme Cofffe", "RBC"]
-      i = Math.floor(Math.random() * places.length)
-      comms.send places[i]
+      c = commands["!coffee"]
+
+      if args[0] is "places"
+        comms.send c._places.join(', ')
+
+      if args[0] is "veto"
+        c._todaysChoice.time = 0
+        comms.send "Vetoing: " + c._todaysChoice.place
+
+      c._makeChoice()
+      comms.send "Today's choice: " + c._todaysChoice.place
 
 
 # inspections are more complicated commands that are responsible for
