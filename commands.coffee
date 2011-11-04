@@ -113,7 +113,7 @@ commands =
           old = c._todaysChoice.place
           tp = c._places.slice(0)
           if c._todaysChoice.place?
-            tp.splice(tp.indexOf(c._todaysChoice.place))
+            tp.splice(tp.indexOf(c._todaysChoice.place), 1)
           i = Math.floor(Math.random() * tp.length)
           c._todaysChoice.place = tp[i]
           c._todaysChoice.time = now
@@ -129,7 +129,7 @@ commands =
         comms.send "Vetoing: " + c._todaysChoice.place
 
       c._makeChoice()
-      comms.send "Today's choice: " + c._todaysChoice.place
+      comms.send "(coffee) " + c._todaysChoice.place
 
 
 # inspections are more complicated commands that are responsible for
@@ -147,6 +147,13 @@ inspections =
       name = message.substring(0, i).trim()
       comms.send "Hello #{ name }, I'm Skynet!"
 
+  washington:
+
+    match: (m) ->
+      m.indexOf('washington') isnt -1
+
+    run: (message) ->
+      comms.send "(washington) saves the children, but not the British children!"
 
 module.exports = {
   commands: commands,
