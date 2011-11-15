@@ -131,6 +131,11 @@ commands =
       c._makeChoice()
       comms.send "(coffee) " + c._todaysChoice.place
 
+  "!docs":
+    run: (args) ->
+      q = args.join(' ')
+      comms.send "http://docs.nyc.squarespace.net/js/?q=" + q
+
 
 # inspections are more complicated commands that are responsible for
 # inspection the message text in their match function. If they want to run
