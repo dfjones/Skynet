@@ -10,7 +10,7 @@ init = (params) ->
 # they accept an argument list which contains every word (separated by whitespace) in the message
 commands =
   "!weather":
-    run: (args) ->
+    run: (args, getForecast) ->
       search = args.join(' ')
       if search is ""
         search = "10013"
@@ -23,8 +23,13 @@ commands =
         request({ uri: uri }, (error, response, body) ->
           json = JSON.parse body
           item = json.query.results.channel.item
+          #console.log(item)
           if not item.condition
             response = item.title
+          else if getForecast
+            response = ""
+            for f in item.forecast
+              response += "#{ f.day }: #{ f.high }/#{f.low} degrees and #{ f.text }\n"
           else
             response = "#{ item.title }: #{ item.condition.temp } degrees and #{ item.condition.text }"
           comms.send response
@@ -45,6 +50,10 @@ commands =
         )
       else
         queryWeather(search)
+  
+  "!forecast":
+    run: (args) ->
+      commands["!weather"].run(args, true)
 
   "!google":
 
