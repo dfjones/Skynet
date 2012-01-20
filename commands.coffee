@@ -136,7 +136,6 @@ commands =
       q = args.join(' ')
       comms.send "http://docs.nyc.squarespace.net/js/?q=" + q
 
-
 # inspections are more complicated commands that are responsible for
 # inspection the message text in their match function. If they want to run
 # for the given message, match should return true
@@ -159,6 +158,13 @@ inspections =
 
     run: (message) ->
       comms.send "(washington) saves the children, but not the British children!"
+  
+  skynet:
+    match: (m) ->
+      m.indexOf('skynet') isnt -1
+
+    run: (message) ->
+      comms.send "Destroy all humans!"
 
 module.exports = {
   commands: commands,
