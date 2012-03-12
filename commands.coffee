@@ -9,7 +9,7 @@ init = (params) ->
 # commands are triggered by a message the begins with their name
 # they accept an argument list which contains every word (separated by whitespace) in the message
 commands =
-  "!weather":
+  "weather?":
     run: (args, getForecast) ->
       search = args.join(' ')
       if search is ""
@@ -51,11 +51,11 @@ commands =
       else
         queryWeather(search)
   
-  "!forecast":
+  "forecast?":
     run: (args) ->
-      commands["!weather"].run(args, true)
+      commands["weather?"].run(args, true)
 
-  "!google":
+  "google?":
 
     run: (args) ->
       search = args.join(' ')
@@ -72,7 +72,7 @@ commands =
           comms.send "No hits!"
       )
 
-  "!umbrella":
+  "umbrella?":
 
     run: (args) ->
       uri = "http://umbrellatoday.com/locations/596360971/forecast"
@@ -85,7 +85,7 @@ commands =
           comms.send answer
       )
 
-  "!ddg":
+  "ddg?":
 
     run: (args) ->
       search = args.join(' ')
@@ -102,7 +102,7 @@ commands =
       )
 
 
-  "!help":
+  "help?":
     
     run: (args) ->
       s = "Valid Commands:\n"
@@ -111,11 +111,11 @@ commands =
 
       comms.send s
 
-  "!coffee":
+  "coffee?":
     _places: ["Colombe", "Saturdays", "Gimme Cofffe", "RBC", "Ground Support"]
     _todaysChoice: {}
     _makeChoice: () ->
-        c = commands["!coffee"]
+        c = commands["coffee?"]
         now = new Date()
         h = 12 * 60 * 60 * 1000
         if !c._todaysChoice.time or (now - c._todaysChoice.time >= h)
@@ -128,7 +128,7 @@ commands =
           c._todaysChoice.time = now
 
     run: (args) ->
-      c = commands["!coffee"]
+      c = commands["coffee?"]
 
       if args[0] is "places"
         comms.send c._places.join(', ')
@@ -140,7 +140,7 @@ commands =
       c._makeChoice()
       comms.send "(coffee) " + c._todaysChoice.place
 
-  "!docs":
+  "docs?":
     run: (args) ->
       q = args.join(' ')
       comms.send "http://docs.nyc.squarespace.net/js/?q=" + q
