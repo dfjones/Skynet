@@ -112,7 +112,7 @@ commands =
       comms.send s
 
   "coffee?":
-    _places: ["Colombe", "Saturdays", "Gimme Cofffe", "RBC", "Ground Support"]
+    _places: ["Gasoline Alley", "Colombe", "Saturdays", "Gimme Cofffe", "RBC", "Ground Support"]
     _todaysChoice: {}
     _makeChoice: () ->
         c = commands["coffee?"]
@@ -170,7 +170,7 @@ inspections =
   
   skynet:
     match: (m) ->
-      m.indexOf('skynet') isnt -1
+      m.toLowerCase().indexOf('skynet') isnt -1
 
     run: (message) ->
       comms.send "Destroy all humans!"
