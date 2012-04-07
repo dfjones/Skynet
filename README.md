@@ -14,7 +14,7 @@ You should create a file called 'account.coffee' with the following
 config =
   jabberId: "xxx_xxx@chat.hipchat.com"
   password: "password"
-  roomJid: "xxx_xxx@conf.hipchat.com"
+  roomJids: ["xxx_xxx@conf.hipchat.com", "yyy_yy@conf.hipchat.com"]
   roomNick: "Nick"
 
 module.exports = config
