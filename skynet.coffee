@@ -1,6 +1,6 @@
 #!/usr/bin/env coffee
 
-sys = require 'sys'
+sys = require 'util'
 util = require 'util'
 xmpp = require 'node-xmpp'
 account = require './account'
@@ -29,7 +29,9 @@ processMessage = (message) ->
         util.log "Error: #{ error }"
 
 comms =
-  room: account.roomJid + '/' + account.roomNick,
+  room: null,
+  setRoom: (roomId) ->
+    comms.room = roomId + '/' + account.roomNick
   sender: null,
   send: (message) ->
     util.log "Sending: " + message
@@ -66,15 +68,17 @@ cl.on 'online', ->
     c('show').t('chat')
   )
 
-  cl.send(new xmpp.Element('presence', {
-      to: account.roomJid + '/' + account.roomNick
-    }).
-    c('x', { xmlns: 'http://jabber.org/protocol/muc' })
-  )
-
-  setInterval( ->
-    cl.send(' ')
-  30000)
+  for room in account.roomJids
+    util.log("Connecting to " + room)
+    do (room) ->
+      announcePresence = ->
+        cl.send(new xmpp.Element('presence', {
+            to: room + '/' + account.roomNick
+          }).
+          c('x', { xmlns: 'http://jabber.org/protocol/muc' })
+        )
+      announcePresence()
+      setInterval(announcePresence, 30000)
 
 cl.on 'stanza', (stanza) ->
   if stanza.attrs?.type is 'error'
@@ -95,6 +99,8 @@ cl.on 'stanza', (stanza) ->
   # ignore messages we sent
   if stanza.attrs.from is account.roomJid + '/' + account.roomNick
     return
+
+  comms.setRoom(stanza.attrs.from.split('/')[0])
 
   body = stanza.getChild 'body'
   # ignore messages without a body
