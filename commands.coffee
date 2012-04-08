@@ -1,5 +1,6 @@
 util = require 'util'
 request = require 'request'
+google = require './google'
 
 comms = null
 
@@ -144,6 +145,15 @@ commands =
     run: (args) ->
       q = args.join(' ')
       comms.send "http://docs.nyc.squarespace.net/js/?q=" + q
+
+  "gee?":
+    run: (args) ->
+      q = args.join(' ')
+      google.imageSearch(q, (results) ->
+        i = Math.floor(Math.random() * results.length)
+        comms.send results[i]
+      )
+
 
 # inspections are more complicated commands that are responsible for
 # inspection the message text in their match function. If they want to run
