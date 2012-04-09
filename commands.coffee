@@ -1,16 +1,11 @@
 util = require 'util'
 request = require 'request'
 
-comms = null
-
-init = (params) ->
-  comms = params.comms
-
 # commands are triggered by a message the begins with their name
 # they accept an argument list which contains every word (separated by whitespace) in the message
 commands =
   "weather?":
-    run: (args, getForecast) ->
+    run: (comms, args, getForecast) ->
       search = args.join(' ')
       if search is ""
         search = "10013"
@@ -52,12 +47,12 @@ commands =
         queryWeather(search)
   
   "forecast?":
-    run: (args) ->
+    run: (comms, args) ->
       commands["weather?"].run(args, true)
 
   "google?":
 
-    run: (args) ->
+    run: (comms, args) ->
       search = args.join(' ')
       util.log "Google search for: #{ search }"
 
@@ -74,7 +69,7 @@ commands =
 
   "umbrella?":
 
-    run: (args) ->
+    run: (comms, args) ->
       uri = "http://umbrellatoday.com/locations/596360971/forecast"
 
       request({ uri: uri }, (error, response, body) ->
@@ -87,7 +82,7 @@ commands =
 
   "ddg?":
 
-    run: (args) ->
+    run: (comms, args) ->
       search = args.join(' ')
       uri = "http://api.duckduckgo.com/?q=#{ encodeURIComponent(search) }&format=json"
 
@@ -104,7 +99,7 @@ commands =
 
   "help?":
     
-    run: (args) ->
+    run: (comms, args) ->
       s = "Valid Commands:\n"
       for c of commands
         s += "#{ c }\n"
@@ -127,7 +122,7 @@ commands =
           c._todaysChoice.place = tp[i]
           c._todaysChoice.time = now
 
-    run: (args) ->
+    run: (comms, args) ->
       c = commands["coffee?"]
 
       if args[0] is "places"
@@ -141,7 +136,7 @@ commands =
       comms.send "(coffee) " + c._todaysChoice.place
 
   "docs?":
-    run: (args) ->
+    run: (comms, args) ->
       q = args.join(' ')
       comms.send "http://docs.nyc.squarespace.net/js/?q=" + q
 
@@ -155,7 +150,7 @@ inspections =
     match: (m) ->
       m.indexOf('meet Skynet') isnt -1
 
-    run: (message) ->
+    run: (comms, message) ->
       i = message.indexOf('meet')
       name = message.substring(0, i).trim()
       comms.send "Hello #{ name }, I'm Skynet!"
@@ -165,19 +160,18 @@ inspections =
     match: (m) ->
       m.indexOf('washington') isnt -1
 
-    run: (message) ->
+    run: (comms, message) ->
       comms.send "(washington) saves the children, but not the British children!"
   
   skynet:
     match: (m) ->
       m.toLowerCase().indexOf('skynet') isnt -1
 
-    run: (message) ->
+    run: (comms, message) ->
       comms.send "Destroy all humans!"
 
 module.exports = {
   commands: commands,
-  inspections: inspections,
-  init: init
+  inspections: inspections
 }
 

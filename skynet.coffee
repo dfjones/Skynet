@@ -13,34 +13,36 @@ parseCommand = (message) ->
     args: parts[1..]
   }
 
-processMessage = (message) ->
+processMessage = (message, comms) ->
   mParts = parseCommand(message)
 
   # if a command exists, run it
-  commands.commands[mParts.command]?.run(mParts.args)
+  commands.commands[mParts.command]?.run(comms, mParts.args)
 
   # run all inspections on message body
   for i of commands.inspections
     i = commands.inspections[i]
-    if i.match message
+    if i.match(message)
       try
-        i.run message
+        i.run(comms, message)
       catch error
         util.log "Error: #{ error }"
 
-comms =
-  room: null,
+class Comms
+  constructor: (roomId, @sender) ->
+    @setRoom(roomId)
+
   setRoom: (roomId) ->
-    comms.room = roomId + '/' + account.roomNick
-  sender: null,
+    @room = roomId + '/' + account.roomNick
+
   send: (message) ->
     util.log "Sending: " + message
-    if comms.sender?
-      util.log "Sending reply to: " + comms.sender
-      to = comms.sender
+    if @sender?
+      util.log "Sending reply to: " + @sender
+      to = @sender
       type = 'chat'
     else
-      to = comms.room
+      to = @room
       type = 'groupchat'
 
     cl.send(new xmpp.Element('message',
@@ -52,10 +54,6 @@ comms =
       c('body').
       t(message)
     )
-
-commands.init({
-  comms: comms
-})
 
 cl = new xmpp.Client
   jid: account.jabberId + '/bot'
@@ -89,18 +87,21 @@ cl.on 'stanza', (stanza) ->
   if not stanza.is('message')
     return
 
-  if stanza.attrs?.type is 'chat'
-    comms.sender = stanza.attrs.from
-  else if stanza.attrs?.type is 'groupchat'
-    comms.sender = null
-  else
-    return
 
   # ignore messages we sent
   if stanza.attrs.from is account.roomJid + '/' + account.roomNick
     return
 
-  comms.setRoom(stanza.attrs.from.split('/')[0])
+
+  sender = null
+  if stanza.attrs?.type is 'chat'
+    sender = stanza.attrs.from
+  else if stanza.attrs?.type is 'groupchat'
+    sender = null
+  else
+    return
+
+  comms = new Comms(stanza.attrs.from.split('/')[0], sender)
 
   body = stanza.getChild 'body'
   # ignore messages without a body
@@ -109,7 +110,7 @@ cl.on 'stanza', (stanza) ->
 
   message = body.getText()
 
-  processMessage message
+  processMessage(message, comms)
 
 
 exports.processMessage = processMessage
