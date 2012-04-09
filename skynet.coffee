@@ -67,8 +67,8 @@ cl.on 'online', ->
   )
 
   for room in account.roomJids
-    util.log("Connecting to " + room)
     do (room) ->
+      util.log("Connecting to " + room)
       announcePresence = ->
         cl.send(new xmpp.Element('presence', {
             to: room + '/' + account.roomNick
