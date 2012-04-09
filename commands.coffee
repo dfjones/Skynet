@@ -1,5 +1,6 @@
 util = require 'util'
 request = require 'request'
+google = require './google'
 
 # commands are triggered by a message the begins with their name
 # they accept an argument list which contains every word (separated by whitespace) in the message
@@ -139,6 +140,15 @@ commands =
     run: (comms, args) ->
       q = args.join(' ')
       comms.send "http://docs.nyc.squarespace.net/js/?q=" + q
+
+  "gee?":
+    run: (args) ->
+      q = args.join(' ')
+      google.imageSearch(q, (results) ->
+        i = Math.floor(Math.random() * results.length)
+        comms.send results[i]
+      )
+
 
 # inspections are more complicated commands that are responsible for
 # inspection the message text in their match function. If they want to run
