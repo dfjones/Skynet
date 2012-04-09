@@ -49,7 +49,7 @@ commands =
   
   "forecast?":
     run: (comms, args) ->
-      commands["weather?"].run(args, true)
+      commands["weather?"].run(comms, args, true)
 
   "google?":
 
