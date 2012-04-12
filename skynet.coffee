@@ -87,11 +87,9 @@ cl.on 'stanza', (stanza) ->
   if not stanza.is('message')
     return
 
-
   # ignore messages we sent
-  if stanza.attrs.from is account.roomJid + '/' + account.roomNick
+  if stanza.attrs.from.indexOf(account.roomNick) isnt -1
     return
-
 
   sender = null
   if stanza.attrs?.type is 'chat'
